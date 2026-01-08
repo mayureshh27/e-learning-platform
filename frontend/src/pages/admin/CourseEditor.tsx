@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import {
     Save, ArrowLeft, Plus, Trash2, GripVertical,
-    ChevronDown, ChevronRight, Loader2, X as XSmallIcon
+    ChevronDown, ChevronRight, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCourse, useUpdateCourse } from '@/hooks/useCourses';
-import type { Module, Lesson } from '@/types/api.types';
+
 
 // Schema Validation
 const lessonSchema = z.object({
@@ -48,7 +48,6 @@ const LEVELS = ['beginner', 'intermediate', 'advanced'] as const;
 
 export function CourseEditor() {
     const { id } = useParams<{ id: string }>();
-    const navigate = useNavigate();
     const { data: course, isLoading: isLoadingCourse } = useCourse(id || '');
     const updateCourse = useUpdateCourse();
 
@@ -68,7 +67,7 @@ export function CourseEditor() {
         },
     });
 
-    const { fields: modules, append: appendModule, remove: removeModule, update: updateModule } = useFieldArray({
+    const { fields: modules, append: appendModule, remove: removeModule } = useFieldArray({
         control,
         name: 'modules',
     });

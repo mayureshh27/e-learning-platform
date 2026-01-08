@@ -56,7 +56,7 @@ export function CoursePlayer() {
         }
         // Find first incomplete lesson or first lesson
         const firstIncomplete = allLessons.find(
-            (l) => !enrollment?.completedLessons.includes(l.lesson._id)
+            (l) => l.lesson._id && !enrollment?.completedLessons.includes(l.lesson._id)
         );
         return firstIncomplete || allLessons[0];
     }, [allLessons, currentLessonId, enrollment]);
@@ -74,10 +74,10 @@ export function CoursePlayer() {
         try {
             await updateProgressMutation.mutateAsync({
                 courseId: id,
-                lessonId: currentLessonData.lesson._id,
+                lessonId: currentLessonData.lesson._id || '',
             });
             // Move to next lesson if available
-            if (nextLesson) {
+            if (nextLesson?.lesson._id) {
                 setCurrentLessonId(nextLesson.lesson._id);
             }
         } catch (err) {
@@ -161,12 +161,12 @@ export function CoursePlayer() {
                                     </h4>
                                     <div className="space-y-1">
                                         {module.lessons?.map((lesson: Lesson) => {
-                                            const isCompleted = isLessonCompleted(lesson._id);
+                                            const isCompleted = lesson._id ? isLessonCompleted(lesson._id) : false;
                                             const isCurrent = currentLessonData?.lesson._id === lesson._id;
                                             return (
                                                 <button
-                                                    key={lesson._id}
-                                                    onClick={() => handleLessonClick(lesson._id)}
+                                                    key={lesson._id || Math.random()}
+                                                    onClick={() => lesson._id && handleLessonClick(lesson._id)}
                                                     className={`w-full text-left p-3 rounded-lg text-sm flex items-center justify-between group transition-all ${isCurrent
                                                         ? 'bg-violet-600/10 text-violet-400 border border-violet-600/20'
                                                         : 'text-zinc-500 hover:bg-white/5'
@@ -254,7 +254,7 @@ export function CoursePlayer() {
                         <Button
                             variant="outline"
                             disabled={!prevLesson}
-                            onClick={() => prevLesson && setCurrentLessonId(prevLesson.lesson._id)}
+                            onClick={() => prevLesson?.lesson._id && setCurrentLessonId(prevLesson.lesson._id)}
                         >
                             <ChevronLeft className="w-4 h-4 mr-2" /> Previous
                         </Button>
@@ -263,7 +263,7 @@ export function CoursePlayer() {
                             <Button variant="ghost">
                                 <MessageSquare className="w-4 h-4 mr-2" /> Discussion
                             </Button>
-                            {currentLessonData && !isLessonCompleted(currentLessonData.lesson._id) && (
+                            {currentLessonData && currentLessonData.lesson._id && !isLessonCompleted(currentLessonData.lesson._id) && (
                                 <Button
                                     variant="outline"
                                     onClick={handleMarkComplete}
@@ -277,7 +277,7 @@ export function CoursePlayer() {
                         <Button
                             variant="primary"
                             disabled={!nextLesson}
-                            onClick={() => nextLesson && setCurrentLessonId(nextLesson.lesson._id)}
+                            onClick={() => nextLesson?.lesson._id && setCurrentLessonId(nextLesson.lesson._id)}
                         >
                             Next <ChevronRight className="w-4 h-4 ml-2" />
                         </Button>
