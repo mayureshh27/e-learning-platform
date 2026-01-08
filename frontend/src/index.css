@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #8b5cf6;
+  --color-brand-secondary: #a78bfa;
+  --color-brand-accent: #c4b5fd;
+  --color-surface-dark: #18181b;
+  --color-surface-card: #27272a;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-zinc-950 text-zinc-50 font-sans antialiased selection:bg-violet-500/30;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10;
+  }
+
+  .neo-brutalist {
+    @apply border-2 border-zinc-50 shadow-[4px_4px_0px_0px_#ffffff];
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-fuchsia-400;
+  }
+}
