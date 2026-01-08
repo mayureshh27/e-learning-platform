@@ -6,13 +6,15 @@ import { signJwt } from '../../utils/jwt';
 import logger from '../../utils/logger';
 
 // Cookie options
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Cookie options
 const accessTokenCookieOptions = {
     maxAge: 15 * 60 * 1000, // 15 mins
     httpOnly: true,
-    domain: 'localhost', // Set to your domain in production
     path: '/',
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax' as const
+    secure: isProduction, // Always secure in prod (for SameSite: None)
+    sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax'
 };
 
 const refreshTokenCookieOptions = {
