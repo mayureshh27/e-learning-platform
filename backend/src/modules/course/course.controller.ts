@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import { CreateCourseInput, UpdateCourseParams, UpdateCourseBody } from './course.schema';
-import Course from '../../models/course.model';
+import Course, { ICourse } from '../../models/course.model';
 import AppError from '../../utils/AppError';
 
 export const createCourseHandler = async (
@@ -15,11 +16,32 @@ export const createCourseHandler = async (
         // Slug generation (simple version)
         const slug = req.body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
 
-        const course = await Course.create({
-            ...req.body,
+        const courseData: Partial<ICourse> = {
+            title: req.body.title,
+            description: req.body.description,
+            price: req.body.price,
+            category: req.body.category,
+            level: req.body.level,
+            thumbnail: req.body.thumbnail,
             slug,
-            instructor: user.sub, // JWT payload has sub
-        });
+            instructor: new mongoose.Types.ObjectId(user.sub),
+            modules: req.body.modules?.map(m => ({
+                title: m.title,
+                _id: m._id ? new mongoose.Types.ObjectId(m._id) : undefined,
+                lessons: m.lessons?.map(l => ({
+                    title: l.title,
+                    type: l.type,
+                    content: l.content || '',
+                    videoUrl: l.videoUrl,
+                    duration: l.duration,
+                    isFree: l.isFree,
+                    _id: l._id ? new mongoose.Types.ObjectId(l._id) : undefined
+                })) || []
+            })) || [],
+            isPublished: req.body.isPublished || false,
+        };
+
+        const course = await Course.create(courseData);
 
         res.status(201).json({ status: 'success', data: course });
     } catch (err) {

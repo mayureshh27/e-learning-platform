@@ -36,3 +36,6 @@ Thumbs.db
 
 # artifacts
 .gemini/
+
+# Seed file (ignored)
+**/seed.ts
