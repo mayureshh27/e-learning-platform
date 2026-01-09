@@ -12,37 +12,45 @@ This project is a modern, scalable E-Learning Platform designed to mimic the cor
 2.  **Course Content Management (CRUD)**:
     -   **Creation**: Built a streamlined `CreateCourseModal` using `react-hook-form` and `zod` for instant validation.
     -   **Curriculum Editor**: Developed a complex, nested form interface (`CourseEditor`) to handle Courses -> Modules -> Lessons structure. This allows admins to visually organize curriculum.
-    -   **Search**: Implemented a responsive search engine with backend **Regex matching** (for partial text search) and frontend **Debouncing** to optimize performance.
+    -   **Search**: Implemented a responsive search engine with backend regex matching and frontend debouncing.
+    -   **Draft Management**: Admins can now filter draft courses and manage visibility, ensuring only polished content is public.
 
 3.  **Interactive Learning Experience**:
-    -   **Course Player**: A dedicated interface for consuming content, featuring automatic progress tracking, lesson navigation, and a distraction-free "Cinema Mode".
-    -   **Progress Tracking**: Percentage-based progress bars calculated dynamically based on completed lessons.
+    -   **Course Player**: A dedicated interface for consuming content, featuring automatic progress tracking and lesson navigation.
+    -   **Video Streaming**: Integrated **Cloudinary** for HLS adaptive bitrate streaming, ensuring smooth playback across devices.
+    -   **Progress Tracking**: Real-time progress bars and "Activity Heatmap" (GitHub-style) to visualize daily learning streaks.
 
 4.  **Admin Dashboard**:
     -   Centralized hub for managing Users, Courses, and Enrollments.
-    -   Data tables with sorting and filtering capabilities.
+    -   **Sorting & Filtering**: Added advanced filtering (published/draft) and sorting (by content length, date).
+    -   **Pagination**: Full pagination support for scaling to thousands of courses.
+
+5.  **DevOps & Infrastructure**:
+    -   **CI/CD Pipeline**: GitHub Actions workflow running backend/frontend type-checks and Jest tests (with MongoDB service) on every push.
+    -   **Environment Security**: Strict environment variable validation using Zod.
 
 ## Challenges Faced
 
-1.  **State Management for Curriculum**:
-    -   *Challenge*: Managing a deeply nested structure (Course > Modules > Lessons) in a form was complex.
-    -   *Solution*: utilized `react-hook-form`'s `useFieldArray` to handle dynamic adding/removing of modules and lessons while keeping the UI performant and type-safe.
+1.  **Video Streaming Integration**:
+    -   *Challenge*: Serving large video files directly from Node.js was inefficient and couldn't handle adaptive quality.
+    -   *Solution*: Integrated Cloudinary for offloading video processing and delivery via HLS, significantly improving user experience.
 
-2.  **Search Performance**:
-    -   *Challenge*: Real-time search caused excessive API calls and UI flickering.
-    -   *Solution*: Implemented a custom `useDebounce` hook (or logic) on the frontend to delay API calls until the user stopped typing, combined with efficient backend indexing (or regex for now).
+2.  **CI/CD Database Testing**:
+    -   *Challenge*: CI tests failed because they couldn't connect to a database, and parallel execution caused race conditions.
+    -   *Solution*: Added a MongoDB service container to the GitHub Actions workflow and enforced sequential test execution (`--runInBand`) to ensure stability.
 
-3.  **UI Consistency**:
-    -   *Challenge*: Maintaining a consistent "Dark Mode" aesthetic across varied components.
-    -   *Solution*: Centralized colors in `tailwind.config` and `index.css`, enforcing a strict color palette (Zinc & Violet) to ensure a premium look.
+3.  **Complex State Management**:
+    -   *Challenge*: Syncing the "Course Editor" state (nested arrays) with the backend and handling optimistic updates.
+    -   *Solution*: Leveraged TanStack Query's cache invalidation to automatically refresh the dashboard upon mutations, eliminating manual state management bugs.
 
 ## Key Learnings
 
--   **TanStack Query is Essential**: Handling server state manually (useEffect + useState) is error-prone. Switching to TanStack Query simplified data fetching, caching, and synchronization (especially for the Course Editor).
--   **Schema Validation**: Sharing (or mirroring) Zod schemas between Frontend and Backend ensures that data integrity issues are caught early, before they reach the database.
--   **Type Safety**: TypeScript proved invaluable when refactoring core data structures (like adding `category` or `_id`), automatically highlighting every file that needed updates.
+-   **TanStack Query is Essential**: Handling server state manually (useEffect + useState) is error-prone. Switching to TanStack Query simplified data fetching, caching, and synchronization.
+-   **Schema Validation**: Sharing Zod schemas between Frontend and Backend ensures that data integrity issues are caught early.
+-   **Automated Testing**: Setting up a proper CI pipeline early saves massive amounts of time by catching regressions (like broken imports or type errors) before deployment.
+-   **HLS Streaming**: Learned the importance of adaptive streaming for media-heavy applications compared to simple progressive download.
 
 ## Future Improvements
--   **Video Streaming**: Integrating Cloudinary or Mux for adaptive bitrate streaming.
 -   **Payment Gateway**: Stripe integration for actual course purchases.
 -   **Social Features**: Comments and Discussion forums for lessons.
+-   **Mobile App**: React Native mobile application reusing the existing backend.

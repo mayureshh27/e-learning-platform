@@ -16,8 +16,9 @@ A modern, full-stack E-Learning platform with video streaming, real-time progres
 
 ### 🛡️ Admin Dashboard
 - **Course Management**: Create, edit, and manage courses with drag-drop media uploads
+- **Draft Control**: Toggle publish state and filter courses by status/visibility
+- **Advanced Sorting**: Sort content by lesson count, date, or popularity
 - **User Management**: View and manage platform users
-- **Enrollment Tracking**: Monitor student progress and completions
 - **Analytics**: Platform-wide statistics and insights
 
 ### 🔐 Security & Core
