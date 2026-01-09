@@ -5,6 +5,7 @@ export interface IUser extends Document {
     name: string;
     email: string;
     password: string;
+    avatarPublicId?: string; // Cloudinary public_id for avatar
     role: 'user' | 'admin' | 'instructor';
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
@@ -14,6 +15,7 @@ const userSchema = new Schema<IUser>(
         name: { type: String, required: true },
         email: { type: String, required: true, unique: true },
         password: { type: String, required: true },
+        avatarPublicId: { type: String }, // Cloudinary public_id
         role: { type: String, enum: ['user', 'admin', 'instructor'], default: 'user' },
     },
     { timestamps: true }

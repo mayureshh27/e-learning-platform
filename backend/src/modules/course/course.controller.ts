@@ -55,6 +55,11 @@ export const getCoursesHandler = async (
     next: NextFunction
 ) => {
     try {
+        // Pagination
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const skip = (page - 1) * limit;
+
         const queryObj = { ...req.query } as any;
         const excludedFields = ['page', 'sort', 'limit', 'fields', 'search'];
         excludedFields.forEach(el => delete queryObj[el]);
@@ -80,9 +85,26 @@ export const getCoursesHandler = async (
             });
         }
 
-        const courses = await query.populate('instructor', 'name email');
+        // Get total count for pagination
+        const total = await Course.countDocuments(query.getFilter());
 
-        res.status(200).json({ status: 'success', results: courses.length, data: courses });
+        // Apply pagination
+        const courses = await query
+            .skip(skip)
+            .limit(limit)
+            .populate('instructor', 'name email');
+
+        res.status(200).json({
+            status: 'success',
+            results: courses.length,
+            data: courses,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        });
     } catch (err) {
         next(err);
     }

@@ -1,92 +1,208 @@
 # E-Learning Platform
 
-A full-stack, comprehensive E-Learning application allowing users to browse, purchase, and learn from video courses, while administrators manage content dynamic curriculum tools.
+[![CI/CD](https://github.com/mayureshh27/e-learning-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/mayureshh27/e-learning-platform/actions/workflows/ci.yml)
 
-## Tech Stack
+A modern, full-stack E-Learning platform with video streaming, real-time progress tracking, and comprehensive admin tools.
 
-### Frontend
-- **React (Vite)**: Fast, modern UI library.
-- **TypeScript**: Type safety and developer experience.
-- **Tailwind CSS**: Utility-first styling for a premium, responsive design.
-- **TanStack Query (React Query)**: Powerful server state management and caching.
-- **React Router DOM**: Client-side routing with protected routes.
-- **Framer Motion**: Smooth animations and transitions.
-- **React Hook Form + Zod**: Robust form handling and validation.
-- **Lucide React**: Beautiful icons.
-
-### Backend
-- **Node.js**: Runtime environment.
-- **Express**: Web server framework.
-- **MongoDB + Mongoose**: NoSQL database for flexible data modeling (Courses, Users, Enrollments).
-- **JWT (JSON Web Tokens)**: Secure stateless authentication with Access/Refresh token rotation.
-- **Helmet & CORS**: Security headers and cross-origin sharing.
-
-## Features
+## ✨ Features
 
 ### 🎓 Student Experience
-- **Course Catalog**: Filterable and searchable course list (Debounced search, Categories).
-- **Course Player**: Immersive video player with sidebar navigation, progress tracking, and "Cinema Mode".
-- **Dashboard**: Track enrolled courses and learning progress.
-- **Responsive Design**: Optimized for Desktop, Tablet, and Mobile.
+- **Course Catalog**: Browse courses with search, filters, and pagination
+- **Free Previews**: Watch free lessons before enrolling
+- **Video Streaming**: HLS adaptive streaming via Cloudinary
+- **Progress Tracking**: Real-time completion tracking with achievements
+- **Activity Heat Map**: Visual calendar showing learning activity
+- **Responsive Design**: Optimized for all devices
 
 ### 🛡️ Admin Dashboard
-- **Analytics**: Overview of total users, enrollments, and completion rates.
-- **Course Management**:
-    - **Create Course**: Modal-based quick creation.
-    - **Course Editor**: Comprehensive editor for managing Course Details and Curriculum (Modules & Lessons).
-- **User Management**: View and manage platform users (Role-based).
-- **Enrollment Management**: Track and manage student enrollments.
+- **Course Management**: Create, edit, and manage courses with drag-drop media uploads
+- **User Management**: View and manage platform users
+- **Enrollment Tracking**: Monitor student progress and completions
+- **Analytics**: Platform-wide statistics and insights
 
 ### 🔐 Security & Core
-- **Authentication**: JWT-based login/signup with secure cookie handling.
-- **RBAC**: Role-Based Access Control (Admin vs. User routes).
-- **Secure API**: Input validation with Zod on both client and server.
+- **JWT Authentication**: Secure token-based auth with refresh tokens
+- **Role-Based Access**: Admin, Instructor, and Student roles
+- **Input Validation**: Zod schemas on client and server
+- **TypeScript**: Strict typing across the entire stack
 
-## Quick Start
+## 🚀 Tech Stack
+
+### Frontend
+- **React 18** + **Vite** - Fast, modern development
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Utility-first styling
+- **TanStack Query** - Server state management
+- **React Router** - Client-side routing
+- **Framer Motion** - Smooth animations
+- **HLS.js** - Video streaming
+
+### Backend
+- **Node.js** + **Express** - Server framework
+- **MongoDB** + **Mongoose** - Database
+- **JWT** - Authentication
+- **Cloudinary** - Media storage and streaming
+- **Pino** - Structured logging
+- **Jest** - Testing framework
+
+## 📦 Quick Start
 
 ### Prerequisites
-- Node.js v18+
-- MongoDB Instance (Local or Atlas)
+- Node.js v18+ or Bun
+- MongoDB (local or Atlas)
+- Cloudinary account
 
 ### Installation
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/mayureshh27/e-learning-platform.git
-    cd e-learning-platform
-    ```
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/mayureshh27/e-learning-platform.git
+   cd e-learning-platform
+   ```
 
-2.  **Install dependencies** (Root, Frontend, Backend):
-    ```bash
-    # Install root dependencies (if any)
-    npm install
+2. **Install dependencies**:
+   ```bash
+   # Backend
+   cd backend
+   bun install
 
-    # Frontend
-    cd frontend
-    npm install
+   # Frontend
+   cd ../frontend
+   bun install
+   ```
 
-    # Backend
-    cd ../server
-    npm install
-    ```
+3. **Environment Setup**:
 
-3.  **Environment Setup**:
-    - Create `frontend/.env` and `server/.env`.
-    - Reference `DEPLOYMENT.md` for required variables.
+   **Backend** (`backend/.env`):
+   ```env
+   NODE_ENV=development
+   PORT=5000
+   MONGO_URI=mongodb://localhost:27017/elearning
+   JWT_SECRET=your-secret-key
+   JWT_EXPIRES_IN=7d
+   CLOUDINARY_CLOUD_NAME=your-cloud-name
+   CLOUDINARY_API_KEY=your-api-key
+   CLOUDINARY_API_SECRET=your-api-secret
+   ```
 
-4.  **Run Development Servers**:
-    ```bash
-    # Terminal 1 (Backend)
-    cd server
-    npm run dev
+   **Frontend** (`frontend/.env`):
+   ```env
+   VITE_API_URL=http://localhost:5000/api
+   VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
+   ```
 
-    # Terminal 2 (Frontend)
-    cd frontend
-    npm run dev
-    ```
+4. **Seed the database** (optional):
+   ```bash
+   cd backend
+   bun run ts-node src/seed.ts
+   # Or for Design Patterns course:
+   bun run ts-node src/seedDesignPatterns.ts
+   ```
 
-## Project Structure
+5. **Run development servers**:
+   ```bash
+   # Terminal 1 (Backend)
+   cd backend
+   bun run dev
 
-- `/frontend`: React application (SPA)
-- `/server`: Express API server
-- `/deployment_guide.md`: Detailed deployment instructions
+   # Terminal 2 (Frontend)
+   cd frontend
+   bun run dev
+   ```
+
+6. **Access the application**:
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:5000/api
+
+## 🧪 Testing
+
+```bash
+# Backend tests
+cd backend
+bun run test
+
+# Frontend build
+cd frontend
+bun run build
+```
+
+## 📁 Project Structure
+
+```
+e-learning-platform/
+├── backend/
+│   ├── src/
+│   │   ├── models/          # Mongoose schemas
+│   │   ├── modules/         # Feature modules (auth, course, etc.)
+│   │   ├── middleware/      # Express middleware
+│   │   ├── utils/           # Helper functions
+│   │   └── __tests__/       # Jest tests
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── components/      # Reusable UI components
+│   │   ├── pages/           # Route pages
+│   │   ├── hooks/           # TanStack Query hooks
+│   │   ├── context/         # React context
+│   │   └── types/           # TypeScript types
+│   └── package.json
+└── .github/
+    └── workflows/
+        └── ci.yml           # CI/CD pipeline
+```
+
+## 🔄 CI/CD
+
+GitHub Actions automatically runs tests on every push and pull request:
+- Backend TypeScript type checking
+- Backend Jest tests (20 tests)
+- Frontend TypeScript type checking
+- Frontend production build
+
+## 📚 API Documentation
+
+### Authentication
+- `POST /api/auth/signup` - Register new user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/me` - Get current user
+- `POST /api/auth/logout` - Logout user
+
+### Courses
+- `GET /api/courses` - List courses (with pagination)
+- `GET /api/courses/:id` - Get course details
+- `POST /api/courses` - Create course (admin)
+- `PUT /api/courses/:id` - Update course (admin)
+- `DELETE /api/courses/:id` - Delete course (admin)
+
+### Enrollments
+- `POST /api/enrollments` - Enroll in course
+- `GET /api/enrollments/my` - Get user's enrollments
+- `PUT /api/enrollments/:id/progress` - Update progress
+
+### Media
+- `POST /api/upload/signature/image` - Get upload signature
+- `POST /api/upload/signature/video` - Get video upload signature (admin)
+- `GET /api/upload/video/:courseId/:lessonId` - Get signed video URL
+
+## 🚀 Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions for:
+- Frontend: Vercel
+- Backend: Render
+- Database: MongoDB Atlas
+- Media: Cloudinary
+
+## 📝 License
+
+MIT
+
+## 👤 Author
+
+**Mayuresh**
+- GitHub: [@mayureshh27](https://github.com/mayureshh27)
+
+## 🙏 Acknowledgments
+
+- Design inspiration from modern e-learning platforms
+- Icons by [Lucide](https://lucide.dev/)
+- Video streaming powered by [Cloudinary](https://cloudinary.com/)

@@ -8,6 +8,7 @@ import authRoutes from './modules/auth/auth.routes';
 import courseRoutes from './modules/course/course.routes';
 import enrollmentRoutes from './modules/enrollment/enrollment.routes';
 import adminRoutes from './modules/admin/admin.routes';
+import uploadRoutes from './modules/upload/upload.routes';
 import logger from './utils/logger';
 
 const app = express();
@@ -48,6 +49,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Error Handler
 app.use(errorHandler);

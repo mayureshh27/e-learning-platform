@@ -37,5 +37,9 @@ Thumbs.db
 # artifacts
 .gemini/
 
+# Video files (too large for git)
+Desgin-patterns/
+design-patterns/
+
 # Seed file (ignored)
 **/seed.ts

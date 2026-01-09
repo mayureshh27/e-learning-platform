@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { PlayCircle, Check, Shield, Star, Clock, Users, BookOpen, Loader2, AlertCircle } from 'lucide-react';
+import { PlayCircle, Check, Shield, Star, BookOpen, Loader2, AlertCircle, ChevronDown, ChevronRight, Lock } from 'lucide-react';
 import { useCourse } from '@/hooks/useCourses';
 import { useEnroll } from '@/hooks/useEnrollments';
 import { useAuth } from '@/context/AuthContext';
@@ -12,6 +13,11 @@ export function CourseDetail() {
     const { isAuthenticated } = useAuth();
     const { data: course, isLoading, isError } = useCourse(id || '');
     const enrollMutation = useEnroll();
+    const [expandedModules, setExpandedModules] = useState<Record<number, boolean>>({});
+
+    const toggleModule = (index: number) => {
+        setExpandedModules(prev => ({ ...prev, [index]: !prev[index] }));
+    };
 
     const handleEnroll = async () => {
         if (!isAuthenticated) {
@@ -48,6 +54,8 @@ export function CourseDetail() {
     }
 
     const instructor = typeof course.instructor === 'object' ? course.instructor : null;
+    const totalLessons = course.modules?.reduce((sum, m) => sum + (m.lessons?.length || 0), 0) || 0;
+    const freeLessons = course.modules?.reduce((sum, m) => sum + (m.lessons?.filter(l => l.isFree).length || 0), 0) || 0;
 
     return (
         <div className="min-h-screen bg-zinc-950 pt-32 pb-20 px-6">
@@ -70,17 +78,17 @@ export function CourseDetail() {
 
                         <div className="flex flex-wrap gap-8 text-sm font-mono text-zinc-500 mb-10">
                             <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-zinc-300" /> --
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Users className="w-4 h-4 text-zinc-300" /> --
-                            </div>
-                            <div className="flex items-center gap-2">
                                 <BookOpen className="w-4 h-4 text-zinc-300" /> {course.modules?.length || 0} Modules
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <PlayCircle className="w-4 h-4 text-zinc-300" /> {totalLessons} Lessons
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Check className="w-4 h-4 text-emerald-500" /> {freeLessons} Free Preview
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4" id="enroll-section">
                             <Button
                                 size="lg"
                                 className="px-8 text-lg h-14 bg-white text-black hover:bg-zinc-200 border-none"
@@ -135,46 +143,95 @@ export function CourseDetail() {
                         </section>
 
                         <section>
-                            <h2 className="text-2xl font-bold text-white mb-6">Course Syllabus</h2>
-                            <div className="space-y-4">
+                            <h2 className="text-2xl font-bold text-white mb-6">Course Curriculum</h2>
+                            <div className="space-y-3">
                                 {course.modules?.map((module, index) => (
-                                    <div key={module._id || index} className="glass-panel p-6 rounded-xl border border-white/5 bg-zinc-900/20 hover:bg-zinc-900/40 transition-colors">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <h3 className="font-bold text-white">Module {index + 1}: {module.title}</h3>
-                                            <span className="text-xs font-mono text-zinc-500">{module.lessons?.length || 0} Lessons</span>
-                                        </div>
-                                        <p className="text-sm text-zinc-400">
-                                            {module.lessons?.map(l => l.title).slice(0, 3).join(', ')}{module.lessons?.length > 3 ? '...' : ''}
-                                        </p>
+                                    <div key={module._id || index} className="glass-panel rounded-xl border border-white/5 bg-zinc-900/20 overflow-hidden">
+                                        <button
+                                            onClick={() => toggleModule(index)}
+                                            className="w-full p-6 flex justify-between items-center hover:bg-zinc-900/40 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                {expandedModules[index] ? (
+                                                    <ChevronDown className="w-5 h-5 text-violet-500" />
+                                                ) : (
+                                                    <ChevronRight className="w-5 h-5 text-zinc-500" />
+                                                )}
+                                                <div className="text-left">
+                                                    <h3 className="font-bold text-white">Module {index + 1}: {module.title}</h3>
+                                                    <p className="text-xs text-zinc-500 mt-1">{module.lessons?.length || 0} lessons</p>
+                                                </div>
+                                            </div>
+                                            <span className="text-xs font-mono text-zinc-500">
+                                                {module.lessons?.reduce((sum, l) => sum + (l.duration || 0), 0)} min
+                                            </span>
+                                        </button>
+
+                                        {expandedModules[index] && (
+                                            <div className="border-t border-white/5 bg-zinc-950/50">
+                                                {module.lessons?.map((lesson, lessonIndex) => {
+                                                    const canPreview = lesson.isFree;
+                                                    const handleLessonClick = () => {
+                                                        if (canPreview && lesson._id) {
+                                                            // Navigate to course player for free lessons
+                                                            navigate(`/player/${id}?lesson=${lesson._id}`);
+                                                        } else {
+                                                            // Scroll to enrollment section for locked lessons
+                                                            const enrollSection = document.getElementById('enroll-section');
+                                                            enrollSection?.scrollIntoView({ behavior: 'smooth' });
+                                                        }
+                                                    };
+
+                                                    return (
+                                                        <div
+                                                            key={lesson._id || lessonIndex}
+                                                            onClick={handleLessonClick}
+                                                            className={`flex items-center justify-between p-4 border-b border-white/5 last:border-0 transition-colors cursor-pointer ${canPreview ? 'hover:bg-violet-900/20' : 'hover:bg-zinc-900/30'
+                                                                }`}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <PlayCircle className={`w-4 h-4 ${canPreview ? 'text-violet-500' : 'text-zinc-500'}`} />
+                                                                <span className="text-sm text-zinc-300">{lesson.title}</span>
+                                                                {lesson.isFree ? (
+                                                                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                                                        Free Preview
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-500 border border-zinc-700">
+                                                                        Enroll to Watch
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex items-center gap-3">
+                                                                <span className="text-xs text-zinc-500">{lesson.duration || 0} min</span>
+                                                                {!lesson.isFree && <Lock className="w-3 h-3 text-zinc-600" />}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
                         </section>
                     </div>
 
-                    <div className="space-y-8">
-                        <div className="glass-panel p-6 rounded-xl border border-white/10 bg-zinc-900/50 sticky top-32">
-                            <h3 className="font-bold text-white mb-4 uppercase tracking-wider text-sm">Your Instructor</h3>
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="w-16 h-16 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center overflow-hidden">
-                                    {instructor?.avatar ? (
-                                        <img src={instructor.avatar} alt={instructor.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <span className="text-xl font-bold text-zinc-600">{instructor?.name?.charAt(0) || '?'}</span>
-                                    )}
-                                </div>
-                                <div>
-                                    <div className="font-bold text-lg text-white">{instructor?.name || 'Unknown'}</div>
-                                    <div className="text-xs text-violet-400 font-mono">{instructor?.role || 'Instructor'}</div>
+                    <div className="space-y-6">
+                        {instructor && (
+                            <div className="glass-panel p-6 rounded-xl border border-white/5 bg-zinc-900/20">
+                                <h3 className="font-bold text-white mb-4">Instructor</h3>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-bold">
+                                        {instructor.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-white">{instructor.name}</p>
+                                        <p className="text-xs text-zinc-500 capitalize">{instructor.role}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <p className="text-sm text-zinc-400 leading-relaxed mb-6">
-                                Expert instructor with years of industry experience.
-                            </p>
-                            <div className="flex gap-2">
-                                <div className="px-3 py-1 rounded bg-zinc-950 border border-white/5 text-xs text-zinc-500 font-mono">--</div>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>

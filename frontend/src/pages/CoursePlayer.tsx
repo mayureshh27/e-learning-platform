@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { VideoPlayer } from '@/components/ui/VideoPlayer';
 import {
     Play,
     CheckCircle,
@@ -199,11 +200,20 @@ export function CoursePlayer() {
             {/* Main Player Area */}
             <div className={`flex-1 flex flex-col h-screen relative ${cinemaMode ? 'bg-black' : ''}`}>
                 <div className="flex-1 bg-zinc-900 flex items-center justify-center relative group">
-                    {/* Video Placeholder */}
+                    {/* Video Player */}
                     <div className="w-full h-full max-h-[80vh] aspect-video bg-black relative flex items-center justify-center">
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none z-10" />
 
-                        {currentLessonData?.lesson.videoUrl ? (
+                        {currentLessonData?.lesson.videoPublicId && id && currentLessonData.lesson._id ? (
+                            // Use Cloudinary VideoPlayer for HLS streaming
+                            <VideoPlayer
+                                courseId={id}
+                                lessonId={currentLessonData.lesson._id}
+                                className="w-full h-full"
+                                onEnded={handleMarkComplete}
+                            />
+                        ) : currentLessonData?.lesson.videoUrl ? (
+                            // Fallback to legacy videoUrl
                             <video
                                 src={currentLessonData.lesson.videoUrl}
                                 controls
@@ -216,7 +226,7 @@ export function CoursePlayer() {
                             </div>
                         )}
 
-                        <div className="absolute bottom-10 left-10 right-10 flex justify-between items-end pointer-events-none">
+                        <div className="absolute bottom-10 left-10 right-10 flex justify-between items-end pointer-events-none z-20">
                             <div>
                                 <h1 className="text-2xl font-bold text-white mb-1">
                                     {currentLessonData?.lesson.title || 'Select a lesson'}

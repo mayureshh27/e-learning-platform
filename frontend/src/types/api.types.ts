@@ -6,6 +6,7 @@ export interface User {
     email: string;
     role: 'user' | 'admin' | 'instructor';
     avatar?: string;
+    avatarPublicId?: string; // Cloudinary public_id
     createdAt: string;
 }
 
@@ -15,6 +16,7 @@ export interface Lesson {
     type: 'video' | 'text';
     content?: string;
     videoUrl?: string;
+    videoPublicId?: string; // Cloudinary public_id for video
     duration?: number;
     isFree?: boolean;
 }
@@ -32,6 +34,7 @@ export interface Course {
     description: string;
     price: number;
     thumbnail: string;
+    thumbnailPublicId?: string; // Cloudinary public_id for thumbnail
     category: string;
     level: 'beginner' | 'intermediate' | 'advanced';
     instructor: User | string; // Can be populated or just ID
@@ -90,11 +93,20 @@ export interface ApiResponse<T> {
     message?: string;
 }
 
+// Pagination metadata
+export interface PaginationMeta {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
 // Actual backend response for courses list
 export interface CoursesListResponse {
     status: 'success';
     results: number;
     data: Course[];
+    pagination?: PaginationMeta;
 }
 
 // Actual backend response for enrollments list

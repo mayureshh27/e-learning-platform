@@ -158,10 +158,10 @@ export function CourseCatalog() {
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
                                     key={course._id}
-                                    className="group glass-panel rounded-xl p-0 border border-white/10 overflow-hidden hover:border-violet-500/30 transition-colors"
+                                    className="group glass-panel rounded-xl p-0 border border-white/10 overflow-hidden hover:border-violet-500/30 transition-colors flex flex-col"
                                 >
                                     {/* Card Content */}
-                                    <div className="p-6">
+                                    <div className="p-6 flex-1">
                                         <div className="flex justify-between items-start mb-4">
                                             <span className={`text-xs font-bold px-2 py-1 rounded bg-zinc-800 text-zinc-300 border border-white/5`}>
                                                 {course.category}

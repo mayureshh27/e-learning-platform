@@ -9,6 +9,7 @@ export interface ILesson {
     type: 'video' | 'text';
     content: string;
     videoUrl?: string;
+    videoPublicId?: string; // Cloudinary public_id for video
     duration?: number;
     isFree?: boolean;
 }
@@ -46,6 +47,7 @@ const lessonSchema = new Schema<ILesson>({
     type: { type: String, enum: ['video', 'text'], default: 'video' },
     content: { type: String },
     videoUrl: { type: String },
+    videoPublicId: { type: String }, // Cloudinary public_id
     duration: { type: Number },
     isFree: { type: Boolean, default: false },
 });

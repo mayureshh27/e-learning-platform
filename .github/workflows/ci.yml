@@ -1,0 +1,74 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: bun install
+
+      - name: TypeScript type checking
+        working-directory: ./backend
+        run: bun run tsc --noEmit
+
+      - name: Run tests
+        working-directory: ./backend
+        run: bun run test
+        env:
+          NODE_ENV: test
+          MONGO_URI: mongodb://localhost:27017/test
+          JWT_SECRET: test-secret-key-for-ci
+          JWT_EXPIRES_IN: 7d
+
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: bun install
+
+      - name: TypeScript type checking
+        working-directory: ./frontend
+        run: bun run tsc -b
+
+      - name: Build production bundle
+        working-directory: ./frontend
+        run: bun run build
+        env:
+          VITE_API_URL: https://api.example.com
+          VITE_CLOUDINARY_CLOUD_NAME: placeholder
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+          retention-days: 7

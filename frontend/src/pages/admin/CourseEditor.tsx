@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,6 +10,8 @@ import {
     ChevronDown, ChevronRight, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ImageUpload } from '@/components/ui/ImageUpload';
+import { VideoUpload } from '@/components/ui/VideoUpload';
 import { useCourse, useUpdateCourse } from '@/hooks/useCourses';
 
 
@@ -20,6 +22,7 @@ const lessonSchema = z.object({
     type: z.enum(['video', 'text']),
     content: z.string().optional(),
     videoUrl: z.string().optional(),
+    videoPublicId: z.string().optional(), // Cloudinary public_id
     duration: z.number().optional(),
     isFree: z.boolean().optional(),
 });
@@ -37,6 +40,7 @@ const courseEditorSchema = z.object({
     category: z.string().min(1),
     level: z.enum(['beginner', 'intermediate', 'advanced']),
     thumbnail: z.string().optional(),
+    thumbnailPublicId: z.string().optional(), // Cloudinary public_id
     isPublished: z.boolean().optional(),
     modules: z.array(moduleSchema),
 });
@@ -230,11 +234,17 @@ export function CourseEditor() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-zinc-400 mb-1">Thumbnail URL</label>
-                                        <input
-                                            {...register('thumbnail')}
-                                            className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-violet-500"
-                                            placeholder="https://..."
+                                        <label className="block text-sm font-medium text-zinc-400 mb-2">Course Thumbnail</label>
+                                        <Controller
+                                            name="thumbnailPublicId"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <ImageUpload
+                                                    value={field.value || ''}
+                                                    onChange={field.onChange}
+                                                    aspectRatio="video"
+                                                />
+                                            )}
                                         />
                                     </div>
                                 </div>
@@ -339,56 +349,68 @@ function LessonsList({ nestIndex, control, register }: LessonsListProps) {
     });
 
     return (
-        <div className="space-y-3 pl-4 border-l-2 border-white/5">
+        <div className="space-y-4 pl-4 border-l-2 border-white/5">
             {fields.map((item, k) => (
-                <div key={item.id} className="group relative bg-zinc-900 rounded-lg p-3 border border-white/5 hover:border-violet-500/30 transition-colors">
-                    <div className="grid grid-cols-12 gap-4 items-start">
-                        <div className="col-span-1 pt-2">
-                            <GripVertical className="w-4 h-4 text-zinc-600 cursor-grab" />
+                <div key={item.id} className="group relative bg-zinc-900 rounded-lg p-4 border border-white/5 hover:border-violet-500/30 transition-colors">
+                    <div className="space-y-4">
+                        {/* Lesson Header */}
+                        <div className="flex gap-3 items-center">
+                            <GripVertical className="w-4 h-4 text-zinc-600 cursor-grab flex-shrink-0" />
+                            <input
+                                {...register(`modules.${nestIndex}.lessons.${k}.title` as const)}
+                                placeholder="Lesson Title"
+                                className="flex-1 bg-zinc-950 border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500"
+                            />
+                            <select
+                                {...register(`modules.${nestIndex}.lessons.${k}.type` as const)}
+                                className="bg-zinc-950 border border-white/10 rounded px-3 py-2 text-sm text-zinc-400 focus:outline-none focus:border-violet-500"
+                            >
+                                <option value="video">Video</option>
+                                <option value="text">Text</option>
+                            </select>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    {...register(`modules.${nestIndex}.lessons.${k}.duration` as const, { valueAsNumber: true })}
+                                    placeholder="Min"
+                                    className="bg-zinc-950 border border-white/10 rounded px-2 py-2 text-sm text-zinc-400 focus:outline-none focus:border-violet-500 w-16"
+                                />
+                                <span className="text-xs text-zinc-600">min</span>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-zinc-500 hover:text-red-400 flex-shrink-0"
+                                onClick={() => remove(k)}
+                            >
+                                <XSmall className="w-4 h-4" />
+                            </Button>
                         </div>
-                        <div className="col-span-11 space-y-3">
-                            <div className="flex gap-3">
-                                <input
-                                    {...register(`modules.${nestIndex}.lessons.${k}.title` as const)}
-                                    placeholder="Lesson Title"
-                                    className="flex-1 bg-zinc-950 border border-white/10 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-violet-500"
-                                />
-                                <div className="flex gap-2">
-                                    <select
-                                        {...register(`modules.${nestIndex}.lessons.${k}.type` as const)}
-                                        className="bg-zinc-950 border border-white/10 rounded px-2 py-1 text-sm text-zinc-400 focus:outline-none focus:border-violet-500"
-                                    >
-                                        <option value="video">Video</option>
-                                        <option value="text">Text</option>
-                                    </select>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-7 w-7 text-zinc-500 hover:text-red-400"
-                                        onClick={() => remove(k)}
-                                    >
-                                        <XSmall className="w-3 h-3" />
-                                    </Button>
-                                </div>
-                            </div>
 
-                            <div className="grid grid-cols-2 gap-3">
-                                <input
-                                    {...register(`modules.${nestIndex}.lessons.${k}.videoUrl` as const)}
-                                    placeholder="Video URL / Content"
-                                    className="bg-zinc-950 border border-white/10 rounded px-2 py-1 text-xs text-zinc-400 focus:outline-none focus:border-violet-500 w-full"
-                                />
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="number"
-                                        {...register(`modules.${nestIndex}.lessons.${k}.duration` as const, { valueAsNumber: true })}
-                                        placeholder="Min"
-                                        className="bg-zinc-950 border border-white/10 rounded px-2 py-1 text-xs text-zinc-400 focus:outline-none focus:border-violet-500 w-16"
+                        {/* Video Upload */}
+                        <div className="ml-7">
+                            <label className="block text-xs font-medium text-zinc-500 mb-2">Lesson Video</label>
+                            <Controller
+                                name={`modules.${nestIndex}.lessons.${k}.videoPublicId` as const}
+                                control={control}
+                                render={({ field }) => (
+                                    <VideoUpload
+                                        value={field.value || ''}
+                                        onChange={field.onChange}
                                     />
-                                    <span className="text-xs text-zinc-600">min</span>
-                                </div>
-                            </div>
+                                )}
+                            />
+                        </div>
+
+                        {/* Free Preview Toggle */}
+                        <div className="ml-7 flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                {...register(`modules.${nestIndex}.lessons.${k}.isFree` as const)}
+                                className="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
+                            />
+                            <span className="text-xs text-zinc-400">Free preview (available to non-enrolled users)</span>
                         </div>
                     </div>
                 </div>
