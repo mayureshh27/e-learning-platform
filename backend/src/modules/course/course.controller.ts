@@ -70,6 +70,13 @@ export const getCoursesHandler = async (
 
         let query = Course.find(JSON.parse(queryStr));
 
+        // Filter unpublished courses for non-admin users
+        const user = res.locals.user;
+        const isAdmin = user?.role === 'admin';
+        if (!isAdmin) {
+            query = query.find({ isPublished: true });
+        }
+
         // Search - using regex for partial matching (case-insensitive)
         if (req.query.search) {
             const searchTerm = req.query.search as string;
@@ -87,6 +94,56 @@ export const getCoursesHandler = async (
 
         // Get total count for pagination
         const total = await Course.countDocuments(query.getFilter());
+
+        // Sorting
+        const sortBy = req.query.sort as string;
+        if (sortBy === 'content') {
+            // Sort by most content (lessons count) - requires aggregation
+            const courses = await Course.aggregate([
+                { $match: query.getFilter() },
+                {
+                    $addFields: {
+                        totalLessons: {
+                            $sum: {
+                                $map: {
+                                    input: '$modules',
+                                    as: 'module',
+                                    in: { $size: { $ifNull: ['$$module.lessons', []] } }
+                                }
+                            }
+                        }
+                    }
+                },
+                { $sort: { totalLessons: -1, createdAt: -1 } },
+                { $skip: skip },
+                { $limit: limit },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'instructor',
+                        foreignField: '_id',
+                        as: 'instructor',
+                        pipeline: [{ $project: { name: 1, email: 1 } }]
+                    }
+                },
+                { $unwind: { path: '$instructor', preserveNullAndEmptyArrays: true } }
+            ]);
+
+            return res.status(200).json({
+                status: 'success',
+                results: courses.length,
+                data: courses,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit),
+                },
+            });
+        }
+
+        // Default sorting (newest first)
+        query = query.sort('-createdAt');
 
         // Apply pagination
         const courses = await query

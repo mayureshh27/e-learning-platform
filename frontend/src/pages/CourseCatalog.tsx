@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Pagination } from '@/components/ui/Pagination';
 import { Search, Filter, BookOpen, Clock, BarChart, Loader2, X } from 'lucide-react';
 import { useCourses } from '@/hooks/useCourses';
 
@@ -15,6 +16,8 @@ export function CourseCatalog() {
     const [searchInput, setSearchInput] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [showFilters, setShowFilters] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [sortBy, setSortBy] = useState<'newest' | 'content'>('content'); // Default to most content
 
     // Debounce search input (300ms delay)
     useEffect(() => {
@@ -24,13 +27,21 @@ export function CourseCatalog() {
         return () => clearTimeout(timer);
     }, [searchInput]);
 
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [activeCategory, activeLevel, debouncedSearch, sortBy]);
+
     const { data, isLoading, isError } = useCourses({
         category: activeCategory === 'All' ? undefined : activeCategory.toLowerCase(),
         level: activeLevel === 'All' ? undefined : activeLevel,
         search: debouncedSearch || undefined,
+        page: currentPage,
+        limit: 9,
     });
 
     const courses = data?.data || [];
+    const pagination = data?.pagination;
 
     const clearFilters = () => {
         setActiveCategory('All');
@@ -212,6 +223,16 @@ export function CourseCatalog() {
                         <p>No courses found matching your criteria.</p>
                         <Button variant="link" onClick={clearFilters}>Clear filters</Button>
                     </div>
+                )}
+
+                {/* Pagination */}
+                {pagination && pagination.totalPages > 1 && (
+                    <Pagination
+                        currentPage={pagination.page}
+                        totalPages={pagination.totalPages}
+                        totalResults={pagination.total}
+                        onPageChange={setCurrentPage}
+                    />
                 )}
             </div>
         </div>
