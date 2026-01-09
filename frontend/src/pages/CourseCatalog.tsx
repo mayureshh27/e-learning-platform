@@ -81,6 +81,14 @@ export function CourseCatalog() {
                             Filters
                             {hasActiveFilters && <span className="ml-2 w-2 h-2 bg-violet-500 rounded-full" />}
                         </Button>
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as 'newest' | 'content')}
+                            className="bg-zinc-900 border border-white/10 rounded-sm px-4 py-2 text-sm focus:outline-none focus:border-violet-500/50 appearance-none cursor-pointer"
+                        >
+                            <option value="content">Most Content</option>
+                            <option value="newest">Newest</option>
+                        </select>
                     </div>
                 </div>
 
