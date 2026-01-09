@@ -1,9 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Ghost, Menu, X, User, LogOut } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
+import { Logo } from '@/components/ui/Logo';
 
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -23,13 +24,9 @@ export function Navbar() {
         <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 glass-panel border-b-0 border-white/5 bg-zinc-950/80 backdrop-blur-md">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 {/* Logo */}
-                <Link to="/" className="flex items-center gap-2 group">
-                    <div className="p-2 bg-violet-600 border-2 border-white shadow-[2px_2px_0px_0px_#ffffff80] group-hover:shadow-none bg-gradient-to-br from-violet-500 to-fuchsia-600 transition-all">
-                        <Ghost className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="text-xl font-bold tracking-tighter uppercase font-display bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
-                        AntiGrav
-                    </span>
+                {/* Logo */}
+                <Link to="/">
+                    <Logo />
                 </Link>
 
                 {/* Desktop Links */}
